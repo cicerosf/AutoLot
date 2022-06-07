@@ -22,6 +22,7 @@ namespace AutoLot.Tests.Base
         protected void ExecuteInATransaction(Action actionToExecute)
         {
             var strategy = _context.Database.CreateExecutionStrategy();
+            
             strategy.Execute(() =>
             {
                 using var transaction = _context.Database.BeginTransaction();

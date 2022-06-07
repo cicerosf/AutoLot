@@ -28,8 +28,9 @@ namespace AutoLot.Tests.IntegrationTests
             IQueryable<Car> query =
                 _context.Cars.IgnoreQueryFilters().Where(x => x.MakeId == makeId);
 
-            var qs = query.ToQueryString();
+            var queryString = query.ToQueryString();
             var cars = query.ToList();
+            
             Assert.Equal(expectedCount, cars.Count);
         }
 
@@ -285,5 +286,108 @@ namespace AutoLot.Tests.IntegrationTests
             Assert.Equal(expectedName, new CarRepository(_context).GetPetName(id));
         }
 
+        [Fact]
+        public void ShouldAddACar()
+        {
+            ExecuteInATransaction(RunTheTest);
+
+            void RunTheTest()
+            {
+                var car = new Car
+                {
+                    Color = "Yellow",
+                    MakeId = 1,
+                    PetName = "Herbie"
+                };
+                
+                var carCount = _context.Cars.Count();
+                
+                _context.Cars.Add(car);
+                _context.SaveChanges();
+                
+                var newCarCount = _context.Cars.Count();
+                
+                Assert.Equal(carCount + 1, newCarCount);
+            }
+        }
+
+        [Fact]
+        public void ShouldAddACarWithAttach()
+        {
+            ExecuteInATransaction(RunTheTest);
+
+            void RunTheTest()
+            {
+                var car = new Car
+                {
+                    Color = "Yellow",
+                    MakeId = 1,
+                    PetName = "Herbie"
+                };
+
+                var carCount = _context.Cars.Count();
+                _context.Cars.Attach(car);
+                
+                Assert.Equal(EntityState.Added, _context.Entry(car).State);
+                
+                _context.SaveChanges();
+                
+                var newCarCount = _context.Cars.Count();
+                
+                Assert.Equal(carCount + 1, newCarCount);
+            }
+        }
+
+        [Fact]
+        public void ShouldAddMultipleCars()
+        {
+            ExecuteInATransaction(RunTheTest);
+            void RunTheTest()
+            {
+                //Have to add 4 to activate batching
+                var cars = new List<Car>
+                 {
+                 new() { Color = "Yellow", MakeId = 1, PetName = "Herbie" },
+                 new() { Color = "White", MakeId = 2, PetName = "Mach 5" },
+                 new() { Color = "Pink", MakeId = 3, PetName = "Avon" },
+                 new() { Color = "Blue", MakeId = 4, PetName = "Blueberry" },
+                 };
+
+                var carCount = _context.Cars.Count();
+                
+                _context.Cars.AddRange(cars);
+                _context.SaveChanges();
+                
+                var newCarCount = _context.Cars.Count();
+                
+                Assert.Equal(carCount + 4, newCarCount);
+            }
+        }
+
+        [Fact]
+        public void ShouldAddAnObjectGraph()
+        {
+            ExecuteInATransaction(RunTheTest);
+            void RunTheTest()
+            {
+                var make = new Make { Name = "Honda" };
+                var car = new Car { Color = "Yellow", MakeId = 1, PetName = "Herbie" };
+                
+                ((List<Car>)make.Cars).Add(car);
+                
+                _context.Makes.Add(make);
+                
+                var carCount = _context.Cars.Count();
+                var makeCount = _context.Makes.Count();
+                
+                _context.SaveChanges();
+                
+                var newCarCount = _context.Cars.Count();
+                var newMakeCount = _context.Makes.Count();
+                
+                Assert.Equal(carCount + 1, newCarCount);
+                Assert.Equal(makeCount + 1, newMakeCount);
+            }
+        }
     }
 }
