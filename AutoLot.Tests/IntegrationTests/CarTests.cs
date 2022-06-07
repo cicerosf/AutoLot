@@ -342,6 +342,7 @@ namespace AutoLot.Tests.IntegrationTests
         public void ShouldAddMultipleCars()
         {
             ExecuteInATransaction(RunTheTest);
+
             void RunTheTest()
             {
                 //Have to add 4 to activate batching
@@ -368,6 +369,7 @@ namespace AutoLot.Tests.IntegrationTests
         public void ShouldAddAnObjectGraph()
         {
             ExecuteInATransaction(RunTheTest);
+
             void RunTheTest()
             {
                 var make = new Make { Name = "Honda" };
@@ -389,5 +391,144 @@ namespace AutoLot.Tests.IntegrationTests
                 Assert.Equal(makeCount + 1, newMakeCount);
             }
         }
+
+        [Fact]
+        public void ShouldUpdateACar()
+        {
+            ExecuteInASharedTransaction(RunTheTest);
+
+            void RunTheTest(IDbContextTransaction transaction)
+            {
+                var car = _context.Cars.First(c => c.Id == 1);
+
+                Assert.Equal("Black", car.Color);
+
+                car.Color = "White";
+                _context.SaveChanges();
+
+                Assert.Equal("White", car.Color);
+                
+                var context2 = TestHelpers.GetSecondContext(_context, transaction);
+                var car2 = context2.Cars.First(c => c.Id == 1);
+                
+                Assert.Equal("White", car2.Color);
+            }
+        }
+
+        [Fact]
+        public void ShouldUpdateACarUsingState()
+        {
+            ExecuteInASharedTransaction(RunTheTest);
+            
+            void RunTheTest(IDbContextTransaction transaction)
+            {
+                var car = _context.Cars.AsNoTracking().First(c => c.Id == 1);
+                Assert.Equal("Black", car.Color);
+                
+                var updatedCar = new Car
+                {
+                    Color = "White", //Original is Black
+                    Id = car.Id,
+                    MakeId = car.MakeId,
+                    PetName = car.PetName,
+                    TimeStamp = car.TimeStamp,
+                    IsDrivable = car.IsDrivable
+                };
+                var context2 = TestHelpers.GetSecondContext(_context, transaction);
+
+                context2.Entry(updatedCar).State = EntityState.Modified;
+                //context2.Cars.Update(updatedCar); -> it would have the same effect
+                context2.SaveChanges();
+
+                var context3 = TestHelpers.GetSecondContext(_context, transaction);
+                var car2 = context3.Cars.First(c => c.Id == 1);
+                
+                Assert.Equal("White", car2.Color);
+            }
+        }
+
+        [Fact]
+        public void ShouldThrowConcurrencyException()
+        {
+            ExecuteInATransaction(RunTheTest);
+
+            void RunTheTest()
+            {
+                var car = _context.Cars.First();
+                //Update the database outside of the context
+                _context.Database.ExecuteSqlInterpolated(
+                    $"Update dbo.Inventory set Color='Pink' where Id = {car.Id}");
+
+                car.Color = "Yellow";
+                
+                var ex = Assert.Throws<CustomConcurrencyException>(() =>
+                    _context.SaveChanges());
+                
+                var entry = ((DbUpdateConcurrencyException)ex.InnerException)?.Entries[0];
+                
+                PropertyValues originalProps = entry.OriginalValues;
+                PropertyValues currentProps = entry.CurrentValues;
+                //This needs another database call
+                
+                PropertyValues databaseProps = entry.GetDatabaseValues();
+            }
+        }
+
+        [Fact]
+        public void ShouldRemoveACar()
+        {
+            ExecuteInATransaction(RunTheTest);
+
+            void RunTheTest()
+            {
+                var carCount = _context.Cars.Count();
+                var car = _context.Cars.First(c => c.Id == 2);
+                
+                _context.Cars.Remove(car);
+                _context.SaveChanges();
+
+                var newCarCount = _context.Cars.Count();
+                
+                Assert.Equal(carCount - 1, newCarCount);
+                Assert.Equal(EntityState.Detached, _context.Entry(car).State);
+            }
+        }
+
+        [Fact]
+        public void ShouldRemoveACarUsingState()
+        {
+            ExecuteInASharedTransaction(RunTheTest);
+
+            void RunTheTest(IDbContextTransaction transaction)
+            {
+                var carCount = _context.Cars.Count();
+                var car = _context.Cars.AsNoTracking().First(c => c.Id == 2);
+
+                var context2 = TestHelpers.GetSecondContext(_context, transaction);
+                context2.Entry(car).State = EntityState.Deleted;
+
+                context2.SaveChanges();
+
+                var newCarCount = _context.Cars.Count();
+                
+                Assert.Equal(carCount - 1, newCarCount);
+                Assert.Equal(EntityState.Detached, _context.Entry(car).State);
+            }
+        }
+
+        [Fact]
+        public void ShouldFailToRemoveACar()
+        {
+            ExecuteInATransaction(RunTheTest);
+
+            void RunTheTest()
+            {
+                var car = _context.Cars.First(c => c.Id == 1);
+                _context.Cars.Remove(car);
+                
+                Assert.Throws<CustomDbUpdateException>(() => _context.SaveChanges());
+            }
+        }
+
     }
 }

@@ -27,15 +27,16 @@ namespace AutoLot.Tests.Helpers
             return new ApplicationDbContext(optionsBuilder.Options);
         }
 
-        public static ApplicationDbContext GetSecondContext(
-            ApplicationDbContext oldContext,
+        public static ApplicationDbContext GetSecondContext(ApplicationDbContext oldContext,
             IDbContextTransaction transaction)
         {
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+
             optionsBuilder.UseSqlServer(oldContext.Database.GetConnectionString(),
                 options => options.EnableRetryOnFailure());
 
             var context = new ApplicationDbContext(optionsBuilder.Options);
+
             context.Database.UseTransaction(transaction.GetDbTransaction());
 
             return context;
