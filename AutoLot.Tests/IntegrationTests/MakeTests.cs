@@ -54,7 +54,6 @@ namespace AutoLot.Tests.IntegrationTests
             var make = _context.Makes.First(x => x.Id == makeId);
             IQueryable<Car> query = _context.Entry(make).Collection(c => c.Cars).Query();
             var queryString = query.ToQueryString();
-            
             query.Load();
             
             Assert.Equal(carCount, make.Cars.Count());
@@ -73,8 +72,7 @@ namespace AutoLot.Tests.IntegrationTests
             IQueryable<Car> query =
                 _context.Entry(make).Collection(c => c.Cars).Query().IgnoreQueryFilters();
             
-            var queryString = query.IgnoreQueryFilters().ToQueryString();
-            
+            var queryString = query.IgnoreQueryFilters().ToQueryString();          
             query.Load();
             
             Assert.Equal(carCount, make.Cars.Count());

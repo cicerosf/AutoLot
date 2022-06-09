@@ -52,9 +52,11 @@ namespace AutoLot.Dal.Initialization
              new() {Id = 5, CustomerId = 5, CarId = 10}
         };
 
-        public static List<CreditRisk> CreditRisks => new()
+        public static List<CreditRisk> CreditRisks => new List<CreditRisk>()
         {
-             new() {Id = 1, CustomerId = Customers[4].Id, PersonalInformation =
+             new CreditRisk()
+             {
+                 Id = 1, CustomerId = Customers[4].Id, PersonalInformation =
                  new Person()
                  {
                     FirstName = Customers[4].PersonalInformation.FirstName,

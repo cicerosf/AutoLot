@@ -150,11 +150,9 @@ namespace AutoLot.Tests.IntegrationTests
         [Fact]
         public void ShouldNotGetTheLemonsUsingFromSql()
         {
-            var entity = _context.Model.FindEntityType($"{typeof(Car).FullName}");
-            
+            var entity = _context.Model.FindEntityType($"{typeof(Car).FullName}");           
             var tableName = entity.GetTableName();
             var schemaName = entity.GetSchema();
-
             var cars = _context.Cars.FromSqlRaw($"Select * from {schemaName}.{tableName}").ToList();
             
             Assert.Equal(9, cars.Count);
@@ -163,11 +161,9 @@ namespace AutoLot.Tests.IntegrationTests
         [Fact]
         public void ShouldGetTheCarsUsingFromSqlWithIgnoreQueryFilters()
         {
-            var entity = _context.Model.FindEntityType($"{typeof(Car).FullName}");
-            
+            var entity = _context.Model.FindEntityType($"{typeof(Car).FullName}");          
             var tableName = entity.GetTableName();
             var schemaName = entity.GetSchema();
-            
             var cars = _context.Cars.FromSqlRaw($"Select * from {schemaName}.{tableName}")
                 .IgnoreQueryFilters().ToList();
             
@@ -196,11 +192,9 @@ namespace AutoLot.Tests.IntegrationTests
         [InlineData(6, 1)]
         public void ShouldGetTheCarsByMakeUsingFromSql(int makeId, int expectedCount)
         {
-            var entity = _context.Model.FindEntityType($"{typeof(Car).FullName}");
-            
+            var entity = _context.Model.FindEntityType($"{typeof(Car).FullName}");         
             var tableName = entity.GetTableName();
-            var schemaName = entity.GetSchema();
-            
+            var schemaName = entity.GetSchema();         
             var cars = _context.Cars.FromSqlRaw($"Select * from {schemaName}.{tableName}")
                 .Where(x => x.MakeId == makeId).ToList();
             
@@ -300,11 +294,9 @@ namespace AutoLot.Tests.IntegrationTests
                     PetName = "Herbie"
                 };
                 
-                var carCount = _context.Cars.Count();
-                
+                var carCount = _context.Cars.Count();            
                 _context.Cars.Add(car);
-                _context.SaveChanges();
-                
+                _context.SaveChanges();             
                 var newCarCount = _context.Cars.Count();
                 
                 Assert.Equal(carCount + 1, newCarCount);
@@ -330,8 +322,7 @@ namespace AutoLot.Tests.IntegrationTests
                 
                 Assert.Equal(EntityState.Added, _context.Entry(car).State);
                 
-                _context.SaveChanges();
-                
+                _context.SaveChanges();             
                 var newCarCount = _context.Cars.Count();
                 
                 Assert.Equal(carCount + 1, newCarCount);
@@ -354,11 +345,9 @@ namespace AutoLot.Tests.IntegrationTests
                  new() { Color = "Blue", MakeId = 4, PetName = "Blueberry" },
                  };
 
-                var carCount = _context.Cars.Count();
-                
+                var carCount = _context.Cars.Count();             
                 _context.Cars.AddRange(cars);
-                _context.SaveChanges();
-                
+                _context.SaveChanges();             
                 var newCarCount = _context.Cars.Count();
                 
                 Assert.Equal(carCount + 4, newCarCount);
@@ -373,12 +362,9 @@ namespace AutoLot.Tests.IntegrationTests
             void RunTheTest()
             {
                 var make = new Make { Name = "Honda" };
-                var car = new Car { Color = "Yellow", MakeId = 1, PetName = "Herbie" };
-                
+                var car = new Car { Color = "Yellow", MakeId = 1, PetName = "Herbie" };           
                 ((List<Car>)make.Cars).Add(car);
-                
                 _context.Makes.Add(make);
-                
                 var carCount = _context.Cars.Count();
                 var makeCount = _context.Makes.Count();
                 
@@ -423,6 +409,7 @@ namespace AutoLot.Tests.IntegrationTests
             void RunTheTest(IDbContextTransaction transaction)
             {
                 var car = _context.Cars.AsNoTracking().First(c => c.Id == 1);
+
                 Assert.Equal("Black", car.Color);
                 
                 var updatedCar = new Car
@@ -435,11 +422,8 @@ namespace AutoLot.Tests.IntegrationTests
                     IsDrivable = car.IsDrivable
                 };
                 var context2 = TestHelpers.GetSecondContext(_context, transaction);
-
                 context2.Entry(updatedCar).State = EntityState.Modified;
-                //context2.Cars.Update(updatedCar); -> it would have the same effect
                 context2.SaveChanges();
-
                 var context3 = TestHelpers.GetSecondContext(_context, transaction);
                 var car2 = context3.Cars.First(c => c.Id == 1);
                 
@@ -459,17 +443,14 @@ namespace AutoLot.Tests.IntegrationTests
                 _context.Database.ExecuteSqlInterpolated(
                     $"Update dbo.Inventory set Color='Pink' where Id = {car.Id}");
 
-                car.Color = "Yellow";
-                
+                car.Color = "Yellow";             
                 var ex = Assert.Throws<CustomConcurrencyException>(() =>
                     _context.SaveChanges());
                 
                 var entry = ((DbUpdateConcurrencyException)ex.InnerException)?.Entries[0];
                 
                 PropertyValues originalProps = entry.OriginalValues;
-                PropertyValues currentProps = entry.CurrentValues;
-                //This needs another database call
-                
+                PropertyValues currentProps = entry.CurrentValues;          
                 PropertyValues databaseProps = entry.GetDatabaseValues();
             }
         }
@@ -482,11 +463,9 @@ namespace AutoLot.Tests.IntegrationTests
             void RunTheTest()
             {
                 var carCount = _context.Cars.Count();
-                var car = _context.Cars.First(c => c.Id == 2);
-                
+                var car = _context.Cars.First(c => c.Id == 2);           
                 _context.Cars.Remove(car);
                 _context.SaveChanges();
-
                 var newCarCount = _context.Cars.Count();
                 
                 Assert.Equal(carCount - 1, newCarCount);
@@ -503,12 +482,9 @@ namespace AutoLot.Tests.IntegrationTests
             {
                 var carCount = _context.Cars.Count();
                 var car = _context.Cars.AsNoTracking().First(c => c.Id == 2);
-
                 var context2 = TestHelpers.GetSecondContext(_context, transaction);
                 context2.Entry(car).State = EntityState.Deleted;
-
                 context2.SaveChanges();
-
                 var newCarCount = _context.Cars.Count();
                 
                 Assert.Equal(carCount - 1, newCarCount);

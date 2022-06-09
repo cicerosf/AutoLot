@@ -166,6 +166,7 @@ namespace AutoLot.Tests.IntegrationTests
         {
             //Gets the first record, database order
             var customer = _context.Customers.First();
+
             Assert.Equal(1, customer.Id);
         }
 
@@ -191,8 +192,7 @@ namespace AutoLot.Tests.IntegrationTests
         [Fact]
         public void FirstOrDefaultShouldReturnDefaultIfNoneMatch()
         {
-            Expression<Func<Customer, bool>> expression = (x => x.Id == 10);
-            
+            Expression<Func<Customer, bool>> expression = (x => x.Id == 10);        
             var customer = _context.Customers.FirstOrDefault(expression);
             
             Assert.Null(customer);
