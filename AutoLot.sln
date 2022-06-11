@@ -12,11 +12,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoLot.Dal", "AutoLot.Dal\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoLot.Tests", "AutoLot.Tests\AutoLot.Tests.csproj", "{7005D0F1-A706-4F38-A9E8-094FBB49C7A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.Api", "AutoLot.Api\AutoLot.Api.csproj", "{FEB1DD2A-3CBF-41AD-8C19-63BFBA335306}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoLot.Api", "AutoLot.Api\AutoLot.Api.csproj", "{FEB1DD2A-3CBF-41AD-8C19-63BFBA335306}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.Mvc", "AutoLot.Mvc\AutoLot.Mvc.csproj", "{E3A42937-0149-431D-82C6-4011593F3AAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoLot.Mvc", "AutoLot.Mvc\AutoLot.Mvc.csproj", "{E3A42937-0149-431D-82C6-4011593F3AAB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1AA56F10-0F9A-4181-9170-07E0EDE7F39A} = {1AA56F10-0F9A-4181-9170-07E0EDE7F39A}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.Services", "AutoLot.Services\AutoLot.Services.csproj", "{4DF40758-F1BD-481F-99FB-4EBCEE121C35}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoLot.Services", "AutoLot.Services\AutoLot.Services.csproj", "{4DF40758-F1BD-481F-99FB-4EBCEE121C35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
