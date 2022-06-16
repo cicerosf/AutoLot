@@ -19,7 +19,7 @@ namespace AutoLot.Dal.EfStructures
         public DbSet<Car>? Cars { get; set; }
         public DbSet<Make>? Makes { get; set; }
         public DbSet<Order>? Orders { get; set; }
-        public DbSet<CustomerOrderViewModel> CustomerOrderViewModel { get; set; }
+        public DbSet<CustomerOrderViewModel>? CustomerOrderViewModel { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

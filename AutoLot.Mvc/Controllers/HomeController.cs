@@ -1,25 +1,28 @@
 ﻿using AutoLot.Mvc.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoLot.Services.Logging;
 
 namespace AutoLot.Mvc.Controllers
 {
+    [Route("[controller]/[action]")]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IAppLogging<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IAppLogging<HomeController> logger)
         {
             _logger = logger;
         }
 
+        [Route("/")]
+        [Route("/[controller]")]
+        [Route("/[controller]/[action]")]
+        [HttpGet]
         public IActionResult Index()
         {
+            _logger.LogAppWarning("This is a test");
             return View();
         }
 

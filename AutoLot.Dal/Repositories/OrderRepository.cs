@@ -14,7 +14,7 @@ namespace AutoLot.Dal.Repositories
         {
         }
 
-        public OrderRepository(DbContextOptions<ApplicationDbContext> options) : base(options)
+        internal OrderRepository(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 

@@ -12,7 +12,7 @@ namespace AutoLot.Dal.Repositories
     {
         public CreditRiskRepository(ApplicationDbContext context) : base(context) { }
 
-        public CreditRiskRepository(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+        internal CreditRiskRepository(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
     }
 }

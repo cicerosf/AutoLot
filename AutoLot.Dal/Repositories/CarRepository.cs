@@ -14,7 +14,7 @@ namespace AutoLot.Dal.Repositories
     {
         public CarRepository(ApplicationDbContext context) : base(context) { }
 
-        public CarRepository(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+        internal CarRepository(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         public override IEnumerable<Car> GetAll()
         {

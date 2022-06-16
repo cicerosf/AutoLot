@@ -14,7 +14,7 @@ namespace AutoLot.Dal.Repositories
         {
         }
 
-        public MakeRepository(DbContextOptions<ApplicationDbContext> options) : base(options)
+        internal MakeRepository(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 

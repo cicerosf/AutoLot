@@ -1,5 +1,3 @@
-using System;
-
 namespace AutoLot.Mvc.Models
 {
     public class ErrorViewModel
