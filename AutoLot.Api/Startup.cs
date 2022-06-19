@@ -10,6 +10,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
+using Microsoft.AspNetCore.Http;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace AutoLot.Api
 {
@@ -46,16 +51,38 @@ namespace AutoLot.Api
             services.AddScoped(typeof(IAppLogging<>), typeof(AppLogging<>));
             
 
-            services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNamingPolicy = null;
-                options.JsonSerializerOptions.WriteIndented = true;
-            });
+            services.AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                    options.SuppressConsumesConstraintForFormFileParameters = true;
+                    options.SuppressMapClientErrors = true;
+                })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
 
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AutoLot.Api", Version = "v1" });
+                c.EnableAnnotations();
+                c.SwaggerDoc("v1",
+                    new OpenApiInfo
+                    {
+                        Title = "AutoLot.Api",
+                        Version = "v1",
+                        Description = "Service to support the AutoLot dealer site",
+                        License = new OpenApiLicense
+                        {
+                            Name = "Skimedic Inc",
+                            Url = new Uri("http://www.skimedic.com")
+                        }
+                    });
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
         }
 
@@ -66,15 +93,16 @@ namespace AutoLot.Api
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "AutoLot.Api v1"));
-
                 if (Configuration.GetValue<bool>("RebuildDataBase"))
                 {
                     SampleDataInitializer.InitializeData(dbContext);
                 }
             }
+
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "AutoLot.Api Service v1"));
 
             app.UseHttpsRedirection();
 
